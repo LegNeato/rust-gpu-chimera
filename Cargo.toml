@@ -1,0 +1,57 @@
+[package]
+name = "rust-gpu-chimera-demo"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+default = []
+cuda = ["cuda_std", "cust", "cuda_builder", "shared/cuda", ]
+vulkan = ["spirv-builder"]
+wgpu = ["dep:wgpu", "pollster", "futures", "spirv-builder"]
+ash = ["vulkan", "dep:ash", "ash-window", "winit", "raw-window-handle"]
+
+[dependencies]
+# Shared dependencies
+shared = { path = "shared" }
+kernel = { path = "kernel", features = [] }
+glam = "0.24"
+bytemuck = { version = "1.14" }
+num_cpus = "1.16"
+parking_lot = "0.12"
+rayon = "1.8"
+rand = "0.8"
+
+# Vulkan dependencies (wgpu)
+wgpu = { version = "26.0", features = ["spirv", "vulkan-portability"], optional = true }
+pollster = { version = "0.3", optional = true }
+futures = { version = "0.3", optional = true }
+
+# Vulkan dependencies (ash)
+ash = { version = "0.38", optional = true }
+ash-window = { version = "0.12", optional = true }
+winit = { version = "0.29", optional = true }
+raw-window-handle = { version = "0.6", optional = true }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# CUDA dependencies (only on non-macOS platforms)
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+cuda_std = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", default-features = false, optional = true }
+cust = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", default-features = false, features = ["glam"], optional = true }
+
+[build-dependencies]
+spirv-builder = { git = "https://github.com/rust-gpu/rust-gpu", branch = "main", optional = true }
+
+[target.'cfg(not(target_os = "macos"))'.build-dependencies]
+cuda_builder = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", optional = true }
+
+[workspace]
+members = ["kernel", "shared"]
+
+[workspace.lints.rust]
+unexpected_cfgs = { level = "allow", check-cfg = ['cfg(target_arch, values("spirv"))'] }
+
+[patch.crates-io]
+num-traits = { git = "https://github.com/rust-num/num-traits", branch = "master" }

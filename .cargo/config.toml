@@ -1,0 +1,8 @@
+[build]
+target-dir = "target"
+
+[target.spirv-unknown-vulkan1.2]
+rustflags = [
+    "-Ctarget-cpu=vulkan1.2",
+    "--check-cfg", "cfg(target_arch, values(\"spirv\"))"
+]

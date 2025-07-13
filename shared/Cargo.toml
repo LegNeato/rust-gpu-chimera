@@ -1,0 +1,18 @@
+[package]
+name = "shared"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytemuck = { version = "1.14", features = ["derive"] }
+
+[dependencies.cust]
+git = "https://github.com/Rust-GPU/Rust-CUDA"
+branch = "main"
+optional = true
+
+[features]
+cuda = ["cust"]
+
+[lints]
+workspace = true

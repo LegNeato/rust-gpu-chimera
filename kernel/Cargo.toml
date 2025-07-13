@@ -1,0 +1,24 @@
+[package]
+name = "kernel"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+glam = { version = "0.24", default-features = false, features = ["libm"] }
+
+shared = { path = "../shared" }
+
+[target.'cfg(target_arch = "spirv")'.dependencies]
+spirv-std = { git = "https://github.com/rust-gpu/rust-gpu", branch = "main" }
+
+[target.'cfg(target_os = "cuda")'.dependencies]
+cuda_std = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", default-features = false }
+
+[target.'cfg(not(any(target_arch = "spirv", target_os = "cuda")))'.dependencies]
+rayon = "1.7"
+
+[lints]
+workspace = true
