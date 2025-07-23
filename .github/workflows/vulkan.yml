@@ -2,9 +2,9 @@ name: Vulkan
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 env:
   RUST_BACKTRACE: 1
@@ -19,32 +19,32 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Vulkan SDK
-        uses: jakoch/install-vulkan-sdk-action@v1
-        with:
-          cache: true
-          stripdown: true
+      - name: Install MoltenVK via Homebrew
+        run: |
+          brew install molten-vk
+          
+          # Set up environment variables for Homebrew MoltenVK
+          export VK_ICD_FILENAMES="$(brew --prefix)/share/vulkan/icd.d/MoltenVK_icd.json"
+          export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
+          
+          echo "VK_ICD_FILENAMES=$VK_ICD_FILENAMES" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          
+          # Disable validation layers
+          echo "VK_INSTANCE_LAYERS=" >> $GITHUB_ENV
+          
+          # MoltenVK environment variables for better compatibility
+          echo "MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS=0" >> $GITHUB_ENV
+          echo "MVK_ALLOW_METAL_FENCES=0" >> $GITHUB_ENV
+          echo "MVK_ALLOW_METAL_EVENTS=0" >> $GITHUB_ENV
+          
+          # Verify installation
+          echo "Checking MoltenVK installation:"
+          ls -la $(brew --prefix)/share/vulkan/icd.d/
+          cat $(brew --prefix)/share/vulkan/icd.d/MoltenVK_icd.json || echo "MoltenVK ICD not found"
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-
-      - name: Setup MoltenVK
-        run: |
-          # Find MoltenVK ICD file
-          export VK_ICD_PATH=$(find $VULKAN_SDK -name "MoltenVK_icd.json" -type f | head -n 1)
-          if [ -z "$VK_ICD_PATH" ]; then
-            echo "MoltenVK ICD not found!"
-            exit 1
-          fi
-          echo "Found MoltenVK ICD at: $VK_ICD_PATH"
-          echo "VK_ICD_FILENAMES=$VK_ICD_PATH" >> $GITHUB_ENV
-          
-          # Find and set library path
-          export VK_LIB_PATH=$(dirname $(find $VULKAN_SDK -name "libMoltenVK.dylib" -type f | head -n 1))
-          if [ -n "$VK_LIB_PATH" ]; then
-            echo "Found MoltenVK library at: $VK_LIB_PATH"
-            echo "DYLD_LIBRARY_PATH=$VK_LIB_PATH:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-          fi
 
       - name: Run the demo (wgpu)
         run: cargo run --release --features wgpu,vulkan
@@ -61,32 +61,32 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install Vulkan SDK
-        uses: jakoch/install-vulkan-sdk-action@v1
-        with:
-          cache: true
-          stripdown: true
+      - name: Install MoltenVK via Homebrew
+        run: |
+          brew install molten-vk
+          
+          # Set up environment variables for Homebrew MoltenVK
+          export VK_ICD_FILENAMES="$(brew --prefix)/share/vulkan/icd.d/MoltenVK_icd.json"
+          export DYLD_LIBRARY_PATH="$(brew --prefix)/lib:$DYLD_LIBRARY_PATH"
+          
+          echo "VK_ICD_FILENAMES=$VK_ICD_FILENAMES" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          
+          # Disable validation layers
+          echo "VK_INSTANCE_LAYERS=" >> $GITHUB_ENV
+          
+          # MoltenVK environment variables for better compatibility
+          echo "MVK_CONFIG_USE_METAL_ARGUMENT_BUFFERS=0" >> $GITHUB_ENV
+          echo "MVK_ALLOW_METAL_FENCES=0" >> $GITHUB_ENV
+          echo "MVK_ALLOW_METAL_EVENTS=0" >> $GITHUB_ENV
+          
+          # Verify installation
+          echo "Checking MoltenVK installation:"
+          ls -la $(brew --prefix)/share/vulkan/icd.d/
+          cat $(brew --prefix)/share/vulkan/icd.d/MoltenVK_icd.json || echo "MoltenVK ICD not found"
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
-
-      - name: Setup MoltenVK
-        run: |
-          # Find MoltenVK ICD file
-          export VK_ICD_PATH=$(find $VULKAN_SDK -name "MoltenVK_icd.json" -type f | head -n 1)
-          if [ -z "$VK_ICD_PATH" ]; then
-            echo "MoltenVK ICD not found!"
-            exit 1
-          fi
-          echo "Found MoltenVK ICD at: $VK_ICD_PATH"
-          echo "VK_ICD_FILENAMES=$VK_ICD_PATH" >> $GITHUB_ENV
-          
-          # Find and set library path
-          export VK_LIB_PATH=$(dirname $(find $VULKAN_SDK -name "libMoltenVK.dylib" -type f | head -n 1))
-          if [ -n "$VK_LIB_PATH" ]; then
-            echo "Found MoltenVK library at: $VK_LIB_PATH"
-            echo "DYLD_LIBRARY_PATH=$VK_LIB_PATH:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
-          fi
 
       - name: Run the demo (ash)
         run: cargo run --release --features ash
