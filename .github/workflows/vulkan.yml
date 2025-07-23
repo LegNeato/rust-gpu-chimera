@@ -31,10 +31,10 @@ jobs:
           echo "MoltenVK contents:"
           ls -la "$MOLTEN_VK_PATH/lib/" || echo "No lib dir"
           
-          # Find the actual library location
-          MOLTEN_VK_LIB=$(find "$MOLTEN_VK_PATH" -name "libMoltenVK.dylib" -o -name "libvulkan.dylib" -o -name "libvulkan.1.dylib" | head -n 1)
-          if [ -z "$MOLTEN_VK_LIB" ]; then
-            echo "ERROR: Could not find MoltenVK library!"
+          # The library is directly in lib/
+          MOLTEN_VK_LIB="$MOLTEN_VK_PATH/lib/libMoltenVK.dylib"
+          if [ ! -f "$MOLTEN_VK_LIB" ]; then
+            echo "ERROR: Could not find MoltenVK library at $MOLTEN_VK_LIB!"
             exit 1
           fi
           echo "Found MoltenVK library at: $MOLTEN_VK_LIB"
@@ -53,7 +53,7 @@ jobs:
           
           # Set up environment variables
           echo "VK_ICD_FILENAMES=$HOME/.config/vulkan/icd.d/MoltenVK_icd.json" >> $GITHUB_ENV
-          echo "DYLD_LIBRARY_PATH=$MOLTEN_VK_PATH/lib/MoltenVK:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$MOLTEN_VK_PATH/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
           
           # Disable validation layers
           echo "VK_INSTANCE_LAYERS=" >> $GITHUB_ENV
@@ -97,10 +97,10 @@ jobs:
           echo "MoltenVK contents:"
           ls -la "$MOLTEN_VK_PATH/lib/" || echo "No lib dir"
           
-          # Find the actual library location
-          MOLTEN_VK_LIB=$(find "$MOLTEN_VK_PATH" -name "libMoltenVK.dylib" -o -name "libvulkan.dylib" -o -name "libvulkan.1.dylib" | head -n 1)
-          if [ -z "$MOLTEN_VK_LIB" ]; then
-            echo "ERROR: Could not find MoltenVK library!"
+          # The library is directly in lib/
+          MOLTEN_VK_LIB="$MOLTEN_VK_PATH/lib/libMoltenVK.dylib"
+          if [ ! -f "$MOLTEN_VK_LIB" ]; then
+            echo "ERROR: Could not find MoltenVK library at $MOLTEN_VK_LIB!"
             exit 1
           fi
           echo "Found MoltenVK library at: $MOLTEN_VK_LIB"
@@ -119,7 +119,7 @@ jobs:
           
           # Set up environment variables
           echo "VK_ICD_FILENAMES=$HOME/.config/vulkan/icd.d/MoltenVK_icd.json" >> $GITHUB_ENV
-          echo "DYLD_LIBRARY_PATH=$MOLTEN_VK_PATH/lib/MoltenVK:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          echo "DYLD_LIBRARY_PATH=$MOLTEN_VK_PATH/lib:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
           
           # Disable validation layers
           echo "VK_INSTANCE_LAYERS=" >> $GITHUB_ENV
