@@ -1,0 +1,22 @@
+name: CUDA Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  RUST_BACKTRACE: 1
+
+jobs:
+  build:
+    name: CUDA Build
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/rust-gpu/rust-cuda-ubuntu24-cuda12:main
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build with CUDA
+        run: cargo build --release --features cuda

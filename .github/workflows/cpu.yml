@@ -1,0 +1,65 @@
+name: CPU Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  RUST_BACKTRACE: 1
+
+jobs:
+  macos:
+    name: macOS CPU
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run the demo
+        run: cargo run --release
+
+      - name: Run unit tests
+        run: cargo test --release
+
+  windows:
+    name: Windows CPU
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run the demo
+        run: cargo run --release
+
+      - name: Run unit tests
+        run: cargo test --release
+
+  linux:
+    name: Linux CPU
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run the demo
+        run: cargo run --release
+
+      - name: Run unit tests
+        run: cargo test --release

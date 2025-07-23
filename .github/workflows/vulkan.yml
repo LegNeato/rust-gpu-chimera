@@ -1,0 +1,107 @@
+name: Vulkan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  RUST_BACKTRACE: 1
+
+jobs:
+  moltenvk-wgpu:
+    name: macOS MoltenVK (wgpu)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@v1
+        with:
+          cache: true
+          stripdown: true
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run the demo (wgpu)
+        run: cargo run --release --features wgpu,vulkan
+
+      - name: Run unit tests (wgpu)
+        run: cargo test --release --features wgpu,vulkan
+
+  moltenvk-ash:
+    name: macOS MoltenVK (ash)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@v1
+        with:
+          cache: true
+          stripdown: true
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run the demo (ash)
+        run: cargo run --release --features ash
+
+      - name: Run unit tests (ash)
+        run: cargo test --release --features ash
+
+  windows-wgpu:
+    name: Windows Vulkan (wgpu)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@v1
+        with:
+          cache: true
+          stripdown: true
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run the demo (wgpu)
+        run: cargo run --release --features wgpu,vulkan
+
+      - name: Run unit tests (wgpu)
+        run: cargo test --release --features wgpu,vulkan
+
+  windows-ash:
+    name: Windows Vulkan (ash)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Vulkan SDK
+        uses: jakoch/install-vulkan-sdk-action@v1
+        with:
+          cache: true
+          stripdown: true
+
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run the demo (ash)
+        run: cargo run --release --features ash
+
+      - name: Run unit tests (ash)
+        run: cargo test --release --features ash
