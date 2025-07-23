@@ -11,9 +11,11 @@ fn print_header() {
 }
 
 fn print_test_header(test_name: &str) {
-    println!("\n┌─────────────────────────────────────────────────┐");
-    println!("│ {test_name:<47} │");
-    println!("└─────────────────────────────────────────────────┘");
+    let width = test_name.len().max(47);
+    let top_bottom = "─".repeat(width + 2);
+    println!("\n┌{top_bottom}┐");
+    println!("│ {test_name:<width$} │");
+    println!("└{top_bottom}┘");
 }
 
 fn log_backend_info(
@@ -143,7 +145,7 @@ fn main() -> Result<()> {
     print_header();
 
     // Test 1: u32 with 1000 elements
-    print_test_header("Test 1: Sorting 1000 u32 elements");
+    print_test_header("Demo 1: Sorting 1000 u32 elements");
     let mut u32_data = vec![0u32; 1000];
     for (i, v) in u32_data.iter_mut().enumerate() {
         *v = ((i * 31337 + 42) % 1000) as u32;
@@ -151,7 +153,7 @@ fn main() -> Result<()> {
     run_test_on_backend(&mut u32_data, "u32", SortOrder::Ascending)?;
 
     // Test 2: u32 with special values
-    print_test_header("Test 2: Sorting u32 with special values");
+    print_test_header("Demo 2: Sorting u32 with special values");
     let mut u32_special = vec![
         42u32,
         7,
@@ -173,7 +175,7 @@ fn main() -> Result<()> {
     run_test_on_backend(&mut u32_special, "u32 special", SortOrder::Ascending)?;
 
     // Test 3: i32 with 1000 elements
-    print_test_header("Test 3: Sorting 1000 i32 elements");
+    print_test_header("Demo 3: Sorting 1000 i32 elements");
     let mut i32_data = vec![0i32; 1000];
     for (i, v) in i32_data.iter_mut().enumerate() {
         *v = ((i as i32 * 31337 - 500000) % 2000) - 1000;
@@ -181,7 +183,7 @@ fn main() -> Result<()> {
     run_test_on_backend(&mut i32_data, "i32", SortOrder::Ascending)?;
 
     // Test 4: i32 with special values
-    print_test_header("Test 4: Sorting i32 with special values");
+    print_test_header("Demo 4: Sorting i32 with special values");
     let mut i32_special = vec![
         -42i32,
         7,
@@ -203,7 +205,7 @@ fn main() -> Result<()> {
     run_test_on_backend(&mut i32_special, "i32 special", SortOrder::Ascending)?;
 
     // Test 5: f32 with 1000 elements
-    print_test_header("Test 5: Sorting 1000 f32 elements");
+    print_test_header("Demo 5: Sorting 1000 f32 elements");
     let mut f32_data = vec![0.0f32; 1000];
     for (i, v) in f32_data.iter_mut().enumerate() {
         *v = ((i as f32 * std::f32::consts::PI) - 500.0) * 0.123;
@@ -211,7 +213,7 @@ fn main() -> Result<()> {
     run_test_on_backend(&mut f32_data, "f32", SortOrder::Ascending)?;
 
     // Test 6: f32 with special values
-    print_test_header("Test 6: Sorting f32 with special values");
+    print_test_header("Demo 6: Sorting f32 with special values");
     let mut f32_special = vec![
         std::f32::consts::PI,
         -2.71,
@@ -233,17 +235,17 @@ fn main() -> Result<()> {
     run_test_on_backend(&mut f32_special, "f32 special", SortOrder::Ascending)?;
 
     // Test 7: u32 descending
-    print_test_header("Test 7: Sorting u32 descending");
+    print_test_header("Demo 7: Sorting u32 descending");
     let u32_desc = vec![42u32, 7, 999, 0, 13, 256, 128, 511, 1, 64];
     run_test_on_backend(&mut u32_desc.clone(), "u32", SortOrder::Descending)?;
 
     // Test 8: i32 descending with negatives
-    print_test_header("Test 8: Sorting i32 descending with negatives");
+    print_test_header("Demo 8: Sorting i32 descending with negatives");
     let i32_desc = vec![-42i32, 7, -999, 0, 13, -256, 128, -1, 100, -100];
     run_test_on_backend(&mut i32_desc.clone(), "i32", SortOrder::Descending)?;
 
     // Test 9: f32 descending with special values
-    print_test_header("Test 9: Sorting f32 descending with special values");
+    print_test_header("Demo 9: Sorting f32 descending with special values");
     let f32_desc = vec![
         std::f32::consts::PI,
         -2.71,
@@ -260,7 +262,7 @@ fn main() -> Result<()> {
     run_test_on_backend(&mut f32_desc.clone(), "f32", SortOrder::Descending)?;
 
     println!("\n═══════════════════════════════════════════════════");
-    println!("All tests completed successfully! 🎉");
+    println!("All demos completed successfully! 🎉");
     println!("═══════════════════════════════════════════════════");
 
     Ok(())
