@@ -28,6 +28,24 @@ jobs:
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
 
+      - name: Setup MoltenVK
+        run: |
+          # Find MoltenVK ICD file
+          export VK_ICD_PATH=$(find $VULKAN_SDK -name "MoltenVK_icd.json" -type f | head -n 1)
+          if [ -z "$VK_ICD_PATH" ]; then
+            echo "MoltenVK ICD not found!"
+            exit 1
+          fi
+          echo "Found MoltenVK ICD at: $VK_ICD_PATH"
+          echo "VK_ICD_FILENAMES=$VK_ICD_PATH" >> $GITHUB_ENV
+          
+          # Find and set library path
+          export VK_LIB_PATH=$(dirname $(find $VULKAN_SDK -name "libMoltenVK.dylib" -type f | head -n 1))
+          if [ -n "$VK_LIB_PATH" ]; then
+            echo "Found MoltenVK library at: $VK_LIB_PATH"
+            echo "DYLD_LIBRARY_PATH=$VK_LIB_PATH:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          fi
+
       - name: Run the demo (wgpu)
         run: cargo run --release --features wgpu,vulkan
 
@@ -51,6 +69,24 @@ jobs:
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
+
+      - name: Setup MoltenVK
+        run: |
+          # Find MoltenVK ICD file
+          export VK_ICD_PATH=$(find $VULKAN_SDK -name "MoltenVK_icd.json" -type f | head -n 1)
+          if [ -z "$VK_ICD_PATH" ]; then
+            echo "MoltenVK ICD not found!"
+            exit 1
+          fi
+          echo "Found MoltenVK ICD at: $VK_ICD_PATH"
+          echo "VK_ICD_FILENAMES=$VK_ICD_PATH" >> $GITHUB_ENV
+          
+          # Find and set library path
+          export VK_LIB_PATH=$(dirname $(find $VULKAN_SDK -name "libMoltenVK.dylib" -type f | head -n 1))
+          if [ -n "$VK_LIB_PATH" ]; then
+            echo "Found MoltenVK library at: $VK_LIB_PATH"
+            echo "DYLD_LIBRARY_PATH=$VK_LIB_PATH:$DYLD_LIBRARY_PATH" >> $GITHUB_ENV
+          fi
 
       - name: Run the demo (ash)
         run: cargo run --release --features ash
