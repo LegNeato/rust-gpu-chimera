@@ -29,7 +29,15 @@ jobs:
           
           # List what was installed
           echo "MoltenVK contents:"
-          ls -la "$MOLTEN_VK_PATH/lib/MoltenVK/" || echo "No MoltenVK lib dir"
+          ls -la "$MOLTEN_VK_PATH/lib/" || echo "No lib dir"
+          
+          # Find the actual library location
+          MOLTEN_VK_LIB=$(find "$MOLTEN_VK_PATH" -name "libMoltenVK.dylib" -o -name "libvulkan.dylib" -o -name "libvulkan.1.dylib" | head -n 1)
+          if [ -z "$MOLTEN_VK_LIB" ]; then
+            echo "ERROR: Could not find MoltenVK library!"
+            exit 1
+          fi
+          echo "Found MoltenVK library at: $MOLTEN_VK_LIB"
           
           # Create ICD file manually since Homebrew doesn't provide one
           mkdir -p "$HOME/.config/vulkan/icd.d"
@@ -37,7 +45,7 @@ jobs:
           {
               "file_format_version" : "1.0.0",
               "ICD": {
-                  "library_path": "$MOLTEN_VK_PATH/lib/MoltenVK/libMoltenVK.dylib",
+                  "library_path": "$MOLTEN_VK_LIB",
                   "api_version" : "1.3.0"
               }
           }
@@ -87,7 +95,15 @@ jobs:
           
           # List what was installed
           echo "MoltenVK contents:"
-          ls -la "$MOLTEN_VK_PATH/lib/MoltenVK/" || echo "No MoltenVK lib dir"
+          ls -la "$MOLTEN_VK_PATH/lib/" || echo "No lib dir"
+          
+          # Find the actual library location
+          MOLTEN_VK_LIB=$(find "$MOLTEN_VK_PATH" -name "libMoltenVK.dylib" -o -name "libvulkan.dylib" -o -name "libvulkan.1.dylib" | head -n 1)
+          if [ -z "$MOLTEN_VK_LIB" ]; then
+            echo "ERROR: Could not find MoltenVK library!"
+            exit 1
+          fi
+          echo "Found MoltenVK library at: $MOLTEN_VK_LIB"
           
           # Create ICD file manually since Homebrew doesn't provide one
           mkdir -p "$HOME/.config/vulkan/icd.d"
@@ -95,7 +111,7 @@ jobs:
           {
               "file_format_version" : "1.0.0",
               "ICD": {
-                  "library_path": "$MOLTEN_VK_PATH/lib/MoltenVK/libMoltenVK.dylib",
+                  "library_path": "$MOLTEN_VK_LIB",
                   "api_version" : "1.3.0"
               }
           }
