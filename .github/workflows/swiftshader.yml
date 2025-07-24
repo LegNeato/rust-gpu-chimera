@@ -2,9 +2,9 @@ name: SwiftShader
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 env:
   RUST_BACKTRACE: 1
@@ -28,9 +28,12 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run the demo (wgpu)
+        # SwiftShader ICD uses relative paths, so we must run from workspace root
+        working-directory: ${{ github.workspace }}
         run: cargo run --release --features wgpu,vulkan
 
       - name: Run unit tests (wgpu)
+        working-directory: ${{ github.workspace }}
         run: cargo test --release --features wgpu,vulkan
 
   macos-ash:
@@ -51,9 +54,11 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run the demo (ash)
+        working-directory: ${{ github.workspace }}
         run: cargo run --release --features ash
 
       - name: Run unit tests (ash)
+        working-directory: ${{ github.workspace }}
         run: cargo test --release --features ash
 
   windows-wgpu:
@@ -74,9 +79,11 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run the demo (wgpu)
+        working-directory: ${{ github.workspace }}
         run: cargo run --release --features wgpu,vulkan
 
       - name: Run unit tests (wgpu)
+        working-directory: ${{ github.workspace }}
         run: cargo test --release --features wgpu,vulkan
 
   windows-ash:
@@ -97,7 +104,9 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run the demo (ash)
+        working-directory: ${{ github.workspace }}
         run: cargo run --release --features ash
 
       - name: Run unit tests (ash)
+        working-directory: ${{ github.workspace }}
         run: cargo test --release --features ash
