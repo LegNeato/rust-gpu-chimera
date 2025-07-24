@@ -1,11 +1,12 @@
 # Rust GPU Chimera Demo
 
-A demonstration of unified GPU compute across multiple platforms, showcasing how the
-same Rust code can run on CUDA, Vulkan (via SPIR-V), Metal, DirectX, and CPU.
+A cross-platform demo of a single Rust codebase running on both the CPU and GPU via
+CUDA, Vulkan, Metal, and DirectX. There are no shader or kernel languages used, only
+Rust.
 
 ### Supported Configurations
 
-| Platform     | Features      | Host   | Backend | Driver        | How it Works         | Status             |
+| Platform     | Rust Features | Host   | Backend | Driver        | How it Works         | Status             |
 | ------------ | ------------- | ------ | ------- | ------------- | -------------------- | ------------------ |
 | **Linux**    | -             | CPU    | -       | -             | Rust → Native        | ✅ Working         |
 | Linux        | `wgpu`        | [wgpu] | Vulkan  | Native        | Rust → SPIR-V        | ✅ Working         |
@@ -46,7 +47,7 @@ same Rust code can run on CUDA, Vulkan (via SPIR-V), Metal, DirectX, and CPU.
 | visionOS     | `cuda`        | [cust] | CUDA    | -             | -                    | ❌ Unavailable[^1] |
 
 [^1]:
-    CUDA is not supported on macOS/iOS/tvOS/visionOS (NVIDIA GPUs not available).  
+    CUDA is not supported on macOS/iOS/tvOS/visionOS.  
     [ZLUDA](https://github.com/vosen/ZLUDA) could potentially enable CUDA on these
     platforms in the future.
 
