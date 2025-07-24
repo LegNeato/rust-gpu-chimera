@@ -2,7 +2,7 @@
 
 use crate::{error::Result, SortRunner};
 use kernel::bitonic_sort_step;
-use shared::{BitonicParams, ThreadId};
+use shared::{BitonicParams, SortOrder, ThreadId};
 
 /// CPU-based runner for bitonic sort using native Rust code
 pub struct CpuRunner;
@@ -23,13 +23,16 @@ impl SortRunner for CpuRunner {
         // Process all threads (on CPU, we simulate parallel execution)
         for thread_idx in 0..params.num_elements {
             let thread_id = ThreadId::new(thread_idx);
+            // Convert u32 to SortOrder
+            let sort_order = SortOrder::try_from(params.sort_order).unwrap();
+
             bitonic_sort_step(
                 thread_id,
                 data,
                 params.stage,
                 params.pass_of_stage,
                 params.num_elements,
-                params.sort_order,
+                sort_order,
             );
         }
         Ok(())

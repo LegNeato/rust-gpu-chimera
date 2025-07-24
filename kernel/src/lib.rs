@@ -147,13 +147,20 @@ pub fn bitonic_kernel(
 ) {
     let thread_id = ThreadId::new(gid.x);
 
+    // Convert u32 to SortOrder
+    let sort_order = if params.sort_order == 0 {
+        SortOrder::Ascending
+    } else {
+        SortOrder::Descending
+    };
+
     bitonic_sort_step(
         thread_id,
         data,
         params.stage,
         params.pass_of_stage,
         params.num_elements,
-        params.sort_order,
+        sort_order,
     );
 }
 
@@ -168,12 +175,19 @@ pub unsafe fn bitonic_kernel(data: *mut u32, params: BitonicParams) {
     // Safety: The caller must ensure the pointer is valid for num_elements
     let data_slice = core::slice::from_raw_parts_mut(data, params.num_elements as usize);
 
+    // Convert u32 to SortOrder
+    let sort_order = if params.sort_order == 0 {
+        SortOrder::Ascending
+    } else {
+        SortOrder::Descending
+    };
+
     bitonic_sort_step(
         thread_id,
         data_slice,
         params.stage,
         params.pass_of_stage,
         params.num_elements,
-        params.sort_order,
+        sort_order,
     );
 }

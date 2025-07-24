@@ -96,13 +96,6 @@ pub enum SortOrder {
     Descending = 1,
 }
 
-// SAFETY: SortOrder is a C-style enum with repr(u32), which guarantees:
-// - Size is exactly 4 bytes (size of u32)
-// - No padding bytes
-// - Only valid bit patterns are 0 and 1
-unsafe impl Zeroable for SortOrder {}
-unsafe impl Pod for SortOrder {}
-
 impl Display for SortOrder {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -128,12 +121,14 @@ unsafe impl DeviceCopy for SortOrder {}
 #[cfg(feature = "cuda")]
 unsafe impl DeviceCopy for BitonicParams {}
 
-impl From<u32> for SortOrder {
-    fn from(value: u32) -> Self {
-        if value == 0 {
-            SortOrder::Descending
-        } else {
-            SortOrder::Ascending
+impl TryFrom<u32> for SortOrder {
+    type Error = &'static str;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(SortOrder::Ascending),
+            1 => Ok(SortOrder::Descending),
+            _ => Err("Invalid SortOrder value"),
         }
     }
 }
@@ -141,8 +136,8 @@ impl From<u32> for SortOrder {
 impl From<SortOrder> for u32 {
     fn from(order: SortOrder) -> u32 {
         match order {
-            SortOrder::Ascending => 1,
-            SortOrder::Descending => 0,
+            SortOrder::Ascending => 0,
+            SortOrder::Descending => 1,
         }
     }
 }
@@ -256,9 +251,9 @@ impl SortableKey for f32 {
 #[repr(C)]
 pub struct BitonicParams {
     pub num_elements: u32,
-    pub stage: Stage,          // Current stage (for multi-dispatch approach)
-    pub pass_of_stage: Pass,   // Current pass within stage
-    pub sort_order: SortOrder, // Sort order using enum
+    pub stage: Stage,        // Current stage (for multi-dispatch approach)
+    pub pass_of_stage: Pass, // Current pass within stage
+    pub sort_order: u32,     // Sort order as u32 (0 = Ascending, 1 = Descending)
 }
 
 /// Direction for bitonic compare operations

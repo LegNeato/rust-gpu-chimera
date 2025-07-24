@@ -71,12 +71,13 @@ impl AshRunner {
                 }
             }
 
-            let instance_info = vk::InstanceCreateInfo::default()
-                .application_info(&app_info)
-                .enabled_extension_names(&extension_names)
-                .flags(create_flags);
-
-            let instance = entry.create_instance(&instance_info, None)?;
+            let instance = entry.create_instance(
+                &vk::InstanceCreateInfo::default()
+                    .application_info(&app_info)
+                    .enabled_extension_names(&extension_names)
+                    .flags(create_flags),
+                None,
+            )?;
 
             // Get physical device
             let physical_devices = instance.enumerate_physical_devices()?;
@@ -136,22 +137,25 @@ impl AshRunner {
                 }
             };
 
-            let device_info = vk::DeviceCreateInfo::default()
-                .queue_create_infos(std::slice::from_ref(&queue_info))
-                .enabled_features(&device_features)
-                .enabled_extension_names(&device_extension_names);
-
-            let device = instance.create_device(physical_device, &device_info, None)?;
+            let device = instance.create_device(
+                physical_device,
+                &vk::DeviceCreateInfo::default()
+                    .queue_create_infos(&[queue_info])
+                    .enabled_features(&device_features)
+                    .enabled_extension_names(&device_extension_names),
+                None,
+            )?;
 
             // Get queue
             let queue = device.get_device_queue(queue_family_index, 0);
 
             // Create command pool
-            let pool_info = vk::CommandPoolCreateInfo::default()
-                .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
-                .queue_family_index(queue_family_index);
-
-            let command_pool = device.create_command_pool(&pool_info, None)?;
+            let command_pool = device.create_command_pool(
+                &vk::CommandPoolCreateInfo::default()
+                    .flags(vk::CommandPoolCreateFlags::RESET_COMMAND_BUFFER)
+                    .queue_family_index(queue_family_index),
+                None,
+            )?;
 
             let mut runner = Self {
                 _entry: entry,
@@ -182,69 +186,67 @@ impl AshRunner {
             // Use the embedded kernel from the main crate
             let kernel_bytes = crate::BITONIC_SPIRV;
             let kernel_code = ash::util::read_spv(&mut std::io::Cursor::new(kernel_bytes))?;
-            let kernel_info = vk::ShaderModuleCreateInfo::default().code(&kernel_code);
-            let shader_module = self.device.create_shader_module(&kernel_info, None)?;
+            let shader_module = self.device.create_shader_module(
+                &vk::ShaderModuleCreateInfo::default().code(&kernel_code),
+                None,
+            )?;
 
             // Create descriptor set layout for 1 buffer
-            let binding = vk::DescriptorSetLayoutBinding::default()
-                .binding(0)
-                .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
-                .descriptor_count(1)
-                .stage_flags(vk::ShaderStageFlags::COMPUTE);
-
-            let layout_info = vk::DescriptorSetLayoutCreateInfo::default()
-                .bindings(std::slice::from_ref(&binding));
-            let descriptor_set_layout = self
-                .device
-                .create_descriptor_set_layout(&layout_info, None)?;
+            let descriptor_set_layout = self.device.create_descriptor_set_layout(
+                &vk::DescriptorSetLayoutCreateInfo::default().bindings(&[
+                    vk::DescriptorSetLayoutBinding::default()
+                        .binding(0)
+                        .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
+                        .descriptor_count(1)
+                        .stage_flags(vk::ShaderStageFlags::COMPUTE),
+                ]),
+                None,
+            )?;
 
             // Create pipeline layout with push constants
-            let push_constant_range = vk::PushConstantRange::default()
-                .stage_flags(vk::ShaderStageFlags::COMPUTE)
-                .offset(0)
-                .size(std::mem::size_of::<BitonicParams>() as u32);
-
-            let pipeline_layout_info = vk::PipelineLayoutCreateInfo::default()
-                .set_layouts(std::slice::from_ref(&descriptor_set_layout))
-                .push_constant_ranges(std::slice::from_ref(&push_constant_range));
-            let pipeline_layout = self
-                .device
-                .create_pipeline_layout(&pipeline_layout_info, None)?;
+            let pipeline_layout = self.device.create_pipeline_layout(
+                &vk::PipelineLayoutCreateInfo::default()
+                    .set_layouts(&[descriptor_set_layout])
+                    .push_constant_ranges(&[vk::PushConstantRange::default()
+                        .stage_flags(vk::ShaderStageFlags::COMPUTE)
+                        .offset(0)
+                        .size(std::mem::size_of::<BitonicParams>() as u32)]),
+                None,
+            )?;
 
             // Create compute pipeline
             let entry_point = option_env!("BITONIC_KERNEL_SPV_ENTRY").unwrap_or("bitonic_kernel");
             let entry_name =
                 CString::new(entry_point).map_err(|e| ChimeraError::Other(e.to_string()))?;
 
-            let stage_info = vk::PipelineShaderStageCreateInfo::default()
-                .stage(vk::ShaderStageFlags::COMPUTE)
-                .module(shader_module)
-                .name(&entry_name);
-
-            let pipeline_info = vk::ComputePipelineCreateInfo::default()
-                .stage(stage_info)
-                .layout(pipeline_layout);
-
-            let pipelines = self
+            let pipeline = self
                 .device
                 .create_compute_pipelines(
                     vk::PipelineCache::null(),
-                    std::slice::from_ref(&pipeline_info),
+                    &[vk::ComputePipelineCreateInfo::default()
+                        .stage(
+                            vk::PipelineShaderStageCreateInfo::default()
+                                .stage(vk::ShaderStageFlags::COMPUTE)
+                                .module(shader_module)
+                                .name(&entry_name),
+                        )
+                        .layout(pipeline_layout)],
                     None,
                 )
-                .map_err(|(_, e)| e)?;
-            let pipeline = pipelines[0];
+                .map_err(|(_, e)| e)?[0];
 
             // Create descriptor pool
-            let pool_size = vk::DescriptorPoolSize::default()
-                .ty(vk::DescriptorType::STORAGE_BUFFER)
-                .descriptor_count(1); // Only need 1 descriptor per set
-
-            let pool_info = vk::DescriptorPoolCreateInfo::default()
-                .max_sets(1) // Only need 1 set at a time since we reset the pool
-                .pool_sizes(std::slice::from_ref(&pool_size))
-                .flags(vk::DescriptorPoolCreateFlags::empty()); // Allow resetting
-            let descriptor_pool = self.device.create_descriptor_pool(&pool_info, None)?;
+            let descriptor_pool = self.device.create_descriptor_pool(
+                &vk::DescriptorPoolCreateInfo::default()
+                    .max_sets(1) // Only need 1 set at a time since we reset the pool
+                    .pool_sizes(&[
+                        vk::DescriptorPoolSize::default()
+                            .ty(vk::DescriptorType::STORAGE_BUFFER)
+                            .descriptor_count(1), // Only need 1 descriptor per set
+                    ])
+                    .flags(vk::DescriptorPoolCreateFlags::empty()), // Allow resetting
+                None,
+            )?;
 
             // Store the created resources
             self.shader_module = Some(shader_module);
@@ -301,16 +303,17 @@ impl AshRunner {
             let workgroup_size = WORKGROUP_SIZE;
 
             // Create data buffer
-            let data_buffer_info = vk::BufferCreateInfo::default()
-                .size(buffer_size)
-                .usage(
-                    vk::BufferUsageFlags::STORAGE_BUFFER
-                        | vk::BufferUsageFlags::TRANSFER_DST
-                        | vk::BufferUsageFlags::TRANSFER_SRC,
-                )
-                .sharing_mode(vk::SharingMode::EXCLUSIVE);
-
-            let data_buffer = self.device.create_buffer(&data_buffer_info, None)?;
+            let data_buffer = self.device.create_buffer(
+                &vk::BufferCreateInfo::default()
+                    .size(buffer_size)
+                    .usage(
+                        vk::BufferUsageFlags::STORAGE_BUFFER
+                            | vk::BufferUsageFlags::TRANSFER_DST
+                            | vk::BufferUsageFlags::TRANSFER_SRC,
+                    )
+                    .sharing_mode(vk::SharingMode::EXCLUSIVE),
+                None,
+            )?;
 
             // Allocate memory for buffer
             let data_mem_reqs = self.device.get_buffer_memory_requirements(data_buffer);
@@ -320,11 +323,12 @@ impl AshRunner {
                 vk::MemoryPropertyFlags::HOST_VISIBLE | vk::MemoryPropertyFlags::HOST_COHERENT,
             )?;
 
-            let data_alloc_info = vk::MemoryAllocateInfo::default()
-                .allocation_size(data_mem_reqs.size)
-                .memory_type_index(memory_type_index);
-
-            let data_memory = self.device.allocate_memory(&data_alloc_info, None)?;
+            let data_memory = self.device.allocate_memory(
+                &vk::MemoryAllocateInfo::default()
+                    .allocation_size(data_mem_reqs.size)
+                    .memory_type_index(memory_type_index),
+                None,
+            )?;
 
             self.device
                 .bind_buffer_memory(data_buffer, data_memory, 0)?;
@@ -355,42 +359,39 @@ impl AshRunner {
                 .reset_descriptor_pool(descriptor_pool, vk::DescriptorPoolResetFlags::empty())?;
 
             // Allocate descriptor set
-            let alloc_info = vk::DescriptorSetAllocateInfo::default()
-                .descriptor_pool(descriptor_pool)
-                .set_layouts(std::slice::from_ref(&descriptor_set_layout));
-
-            let descriptor_sets = self.device.allocate_descriptor_sets(&alloc_info)?;
-            let descriptor_set = descriptor_sets[0];
+            let descriptor_set = self.device.allocate_descriptor_sets(
+                &vk::DescriptorSetAllocateInfo::default()
+                    .descriptor_pool(descriptor_pool)
+                    .set_layouts(&[descriptor_set_layout]),
+            )?[0];
 
             // Update descriptor set
-            let buffer_info = vk::DescriptorBufferInfo::default()
-                .buffer(data_buffer)
-                .offset(0)
-                .range(buffer_size);
-
-            let write_desc = vk::WriteDescriptorSet::default()
-                .dst_set(descriptor_set)
-                .dst_binding(0)
-                .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
-                .buffer_info(std::slice::from_ref(&buffer_info));
-
-            self.device.update_descriptor_sets(&[write_desc], &[]);
+            self.device.update_descriptor_sets(
+                &[vk::WriteDescriptorSet::default()
+                    .dst_set(descriptor_set)
+                    .dst_binding(0)
+                    .descriptor_type(vk::DescriptorType::STORAGE_BUFFER)
+                    .buffer_info(&[vk::DescriptorBufferInfo::default()
+                        .buffer(data_buffer)
+                        .offset(0)
+                        .range(buffer_size)])],
+                &[],
+            );
 
             // Create command buffer
-            let cmd_alloc_info = vk::CommandBufferAllocateInfo::default()
-                .command_pool(self.command_pool)
-                .level(vk::CommandBufferLevel::PRIMARY)
-                .command_buffer_count(1);
-
-            let command_buffers = self.device.allocate_command_buffers(&cmd_alloc_info)?;
-            let command_buffer = command_buffers[0];
+            let command_buffer = self.device.allocate_command_buffers(
+                &vk::CommandBufferAllocateInfo::default()
+                    .command_pool(self.command_pool)
+                    .level(vk::CommandBufferLevel::PRIMARY)
+                    .command_buffer_count(1),
+            )?[0];
 
             // Record commands for this single pass
-            let begin_info = vk::CommandBufferBeginInfo::default()
-                .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
-
-            self.device
-                .begin_command_buffer(command_buffer, &begin_info)?;
+            self.device.begin_command_buffer(
+                command_buffer,
+                &vk::CommandBufferBeginInfo::default()
+                    .flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT),
+            )?;
 
             self.device
                 .cmd_bind_pipeline(command_buffer, vk::PipelineBindPoint::COMPUTE, pipeline);
@@ -421,11 +422,11 @@ impl AshRunner {
             self.device.end_command_buffer(command_buffer)?;
 
             // Submit and wait
-            let command_buffers_array = [command_buffer];
-            let submit_info = vk::SubmitInfo::default().command_buffers(&command_buffers_array);
-
-            self.device
-                .queue_submit(self.queue, &[submit_info], vk::Fence::null())?;
+            self.device.queue_submit(
+                self.queue,
+                &[vk::SubmitInfo::default().command_buffers(&[command_buffer])],
+                vk::Fence::null(),
+            )?;
             self.device.queue_wait_idle(self.queue)?;
 
             // Read results
@@ -437,7 +438,7 @@ impl AshRunner {
 
             // Cleanup (only temporary resources, not cached ones)
             self.device
-                .free_command_buffers(self.command_pool, &command_buffers);
+                .free_command_buffers(self.command_pool, &[command_buffer]);
             self.device.free_memory(data_memory, None);
             self.device.destroy_buffer(data_buffer, None);
 

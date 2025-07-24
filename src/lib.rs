@@ -71,7 +71,7 @@ pub trait SortRunner {
                     num_elements: n,
                     stage: Stage::new(stage),
                     pass_of_stage: Pass::new(pass),
-                    sort_order: order,
+                    sort_order: order.into(),
                 };
                 self.execute_kernel_pass(data, params)?;
             }
