@@ -19,7 +19,7 @@ pub mod error;
 pub mod runners;
 
 use error::Result;
-use shared::{next_power_of_two, BitonicParams, Pass, SortOrder, SortableKey, Stage};
+use shared::{BitonicParams, Pass, SortOrder, SortableKey, Stage};
 
 /// Common trait for all sorting backends
 pub trait SortRunner {
@@ -50,7 +50,7 @@ pub trait SortRunner {
 
     /// Pad data to power of 2 size with appropriate sentinel values
     fn pad_data(&self, data: &mut Vec<u32>, original_size: usize, order: SortOrder) {
-        let padded_size = next_power_of_two(original_size);
+        let padded_size = original_size.next_power_of_two();
         if padded_size > original_size {
             let sentinel = match order {
                 SortOrder::Ascending => u32::MAX,

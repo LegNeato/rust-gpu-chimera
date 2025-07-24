@@ -279,18 +279,3 @@ impl CompareDirection {
     }
 }
 
-/// Helper to check if array size is power of 2
-#[inline]
-pub fn is_power_of_two(n: usize) -> bool {
-    n > 0 && (n & (n - 1)) == 0
-}
-
-/// Get the next power of 2 greater than or equal to n
-#[inline]
-pub fn next_power_of_two(n: usize) -> usize {
-    if is_power_of_two(n) {
-        n
-    } else {
-        1 << (64 - (n - 1).leading_zeros())
-    }
-}
