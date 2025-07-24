@@ -144,7 +144,6 @@ where
 fn main() -> Result<()> {
     print_header();
 
-    // Test 1: u32 with 1000 elements
     print_test_header("Demo 1: Sorting 1000 u32 elements");
     let mut u32_data = vec![0u32; 1000];
     for (i, v) in u32_data.iter_mut().enumerate() {
@@ -152,7 +151,6 @@ fn main() -> Result<()> {
     }
     run_test_on_backend(&mut u32_data, "u32", SortOrder::Ascending)?;
 
-    // Test 2: u32 with special values
     print_test_header("Demo 2: Sorting u32 with special values");
     let mut u32_special = vec![
         42u32,
@@ -174,7 +172,6 @@ fn main() -> Result<()> {
     ];
     run_test_on_backend(&mut u32_special, "u32 special", SortOrder::Ascending)?;
 
-    // Test 3: i32 with 1000 elements
     print_test_header("Demo 3: Sorting 1000 i32 elements");
     let mut i32_data = vec![0i32; 1000];
     for (i, v) in i32_data.iter_mut().enumerate() {
@@ -182,7 +179,6 @@ fn main() -> Result<()> {
     }
     run_test_on_backend(&mut i32_data, "i32", SortOrder::Ascending)?;
 
-    // Test 4: i32 with special values
     print_test_header("Demo 4: Sorting i32 with special values");
     let mut i32_special = vec![
         -42i32,
@@ -204,7 +200,6 @@ fn main() -> Result<()> {
     ];
     run_test_on_backend(&mut i32_special, "i32 special", SortOrder::Ascending)?;
 
-    // Test 5: f32 with 1000 elements
     print_test_header("Demo 5: Sorting 1000 f32 elements");
     let mut f32_data = vec![0.0f32; 1000];
     for (i, v) in f32_data.iter_mut().enumerate() {
@@ -212,7 +207,6 @@ fn main() -> Result<()> {
     }
     run_test_on_backend(&mut f32_data, "f32", SortOrder::Ascending)?;
 
-    // Test 6: f32 with special values
     print_test_header("Demo 6: Sorting f32 with special values");
     let mut f32_special = vec![
         std::f32::consts::PI,
@@ -234,17 +228,14 @@ fn main() -> Result<()> {
     ];
     run_test_on_backend(&mut f32_special, "f32 special", SortOrder::Ascending)?;
 
-    // Test 7: u32 descending
     print_test_header("Demo 7: Sorting u32 descending");
     let u32_desc = vec![42u32, 7, 999, 0, 13, 256, 128, 511, 1, 64];
     run_test_on_backend(&mut u32_desc.clone(), "u32", SortOrder::Descending)?;
 
-    // Test 8: i32 descending with negatives
     print_test_header("Demo 8: Sorting i32 descending with negatives");
     let i32_desc = vec![-42i32, 7, -999, 0, 13, -256, 128, -1, 100, -100];
     run_test_on_backend(&mut i32_desc.clone(), "i32", SortOrder::Descending)?;
 
-    // Test 9: f32 descending with special values
     print_test_header("Demo 9: Sorting f32 descending with special values");
     let f32_desc = vec![
         std::f32::consts::PI,
