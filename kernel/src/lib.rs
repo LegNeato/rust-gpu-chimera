@@ -41,13 +41,14 @@ pub struct ComparisonPair {
 
 impl ComparisonPair {
     #[inline]
-    fn try_new(thread_id: ThreadId, partner: ThreadId) -> (bool, Self) {
-        let is_valid = partner.as_u32() > thread_id.as_u32();
-        let pair = Self {
+    fn try_new(thread_id: ThreadId, partner: ThreadId) -> Option<Self> {
+        if partner.as_u32() <= thread_id.as_u32() {
+            return None;
+        }
+        Some(Self {
             lower: thread_id,
             upper: partner,
-        };
-        (is_valid, pair)
+        })
     }
 
     #[inline]
@@ -127,13 +128,15 @@ pub fn bitonic_sort_step(
     let partner = distance.find_partner(thread_id);
 
     // Create comparison pair if valid
-    let (is_valid, pair) = ComparisonPair::try_new(thread_id, partner);
-    if is_valid && pair.is_in_bounds(num_elements) {
-        // Determine sort direction for this comparison
-        let direction = BitonicDirection::from_position(thread_id, stage, sort_order);
+    let pair = ComparisonPair::try_new(thread_id, partner);
+    if let Some(pair) = pair {
+        if pair.is_in_bounds(num_elements) {
+            // Determine sort direction for this comparison
+            let direction = BitonicDirection::from_position(thread_id, stage, sort_order);
 
-        // Perform the comparison and swap
-        compare_and_swap(data, pair, direction);
+            // Perform the comparison and swap
+            compare_and_swap(data, pair, direction);
+        }
     }
 }
 
