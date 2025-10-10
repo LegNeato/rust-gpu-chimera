@@ -78,6 +78,7 @@ if ! command -v llvm-config-7 &> /dev/null && ! command -v llvm-config &> /dev/n
     # Install LLVM dependencies
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get -qq -y install \
+        cmake \
         libffi-dev \
         libedit-dev \
         libncurses5-dev \
