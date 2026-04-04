@@ -36,14 +36,27 @@ impl WgpuRunner {
             ..Default::default()
         });
 
-        let adapter = instance
+        let adapter = match instance
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::HighPerformance,
                 force_fallback_adapter: false,
                 compatible_surface: None,
             })
             .await
-            .map_err(|_| ChimeraError::NoAdapter)?;
+        {
+            Ok(adapter) => adapter,
+            Err(_) => {
+                // Retry with fallback adapter (e.g. lavapipe on CI)
+                instance
+                    .request_adapter(&wgpu::RequestAdapterOptions {
+                        power_preference: wgpu::PowerPreference::default(),
+                        force_fallback_adapter: true,
+                        compatible_surface: None,
+                    })
+                    .await
+                    .map_err(|_| ChimeraError::NoAdapter)?
+            }
+        };
 
         // Get adapter info to show which backend we're using
         let info = adapter.get_info();

@@ -67,7 +67,7 @@ impl BitonicDirection {
     fn from_position(thread_id: ThreadId, stage: Stage, global_order: SortOrder) -> Self {
         let block_size = 2u32 << stage.as_u32();
         let block_index = thread_id.as_u32() / block_size;
-        let block_ascending = block_index % 2 == 0;
+        let block_ascending = block_index.is_multiple_of(2);
 
         Self {
             block_ascending: match global_order {

@@ -23,10 +23,9 @@ fn build_spirv_kernel() {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
     let crate_path = PathBuf::from(manifest_dir).join("kernel");
 
-    let result = SpirvBuilder::new(crate_path, "spirv-unknown-vulkan1.2")
-        .print_metadata(spirv_builder::MetadataPrintout::Full)
-        .build()
-        .unwrap();
+    let mut builder = SpirvBuilder::new(crate_path, "spirv-unknown-vulkan1.2");
+    builder.build_script.defaults = true;
+    let result = builder.build().unwrap();
 
     // Export the kernel path for the runtime to use
     println!(

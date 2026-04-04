@@ -278,4 +278,3 @@ impl CompareDirection {
         matches!(self, CompareDirection::Up)
     }
 }
-

@@ -15,7 +15,7 @@ ash = ["vulkan", "dep:ash", "ash-window", "winit", "raw-window-handle"]
 # Shared dependencies
 shared = { path = "shared" }
 kernel = { path = "kernel", features = [] }
-glam = "0.24"
+glam = "0.30"
 bytemuck = { version = "1.14" }
 num_cpus = "1.16"
 parking_lot = "0.12"
@@ -39,14 +39,14 @@ anyhow = "1.0"
 
 # CUDA dependencies (only on non-macOS platforms)
 [target.'cfg(not(target_os = "macos"))'.dependencies]
-cuda_std = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", default-features = false, optional = true }
-cust = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", default-features = false, features = ["glam"], optional = true }
+cuda_std = { git = "https://github.com/Rust-GPU/Rust-CUDA", rev = "0bc607f", default-features = false, optional = true }
+cust = { git = "https://github.com/Rust-GPU/Rust-CUDA", rev = "0bc607f", default-features = false, features = ["impl_glam"], optional = true }
 
 [build-dependencies]
-spirv-builder = { git = "https://github.com/rust-gpu/rust-gpu", branch = "main", optional = true }
+spirv-builder = { git = "https://github.com/rust-gpu/rust-gpu", rev = "ddb039b", optional = true }
 
 [target.'cfg(not(target_os = "macos"))'.build-dependencies]
-cuda_builder = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", optional = true }
+cuda_builder = { git = "https://github.com/Rust-GPU/Rust-CUDA", rev = "0bc607f", features = ["rustc_codegen_nvvm"], optional = true }
 
 [workspace]
 members = ["kernel", "shared"]
@@ -54,5 +54,3 @@ members = ["kernel", "shared"]
 [workspace.lints.rust]
 unexpected_cfgs = { level = "allow", check-cfg = ['cfg(target_arch, values("spirv"))'] }
 
-[patch.crates-io]
-num-traits = { git = "https://github.com/rust-num/num-traits", branch = "master" }

@@ -8,7 +8,7 @@ bytemuck = { version = "1.14", features = ["derive"] }
 
 [dependencies.cust]
 git = "https://github.com/Rust-GPU/Rust-CUDA"
-branch = "main"
+rev = "0bc607f"
 optional = true
 
 [features]
