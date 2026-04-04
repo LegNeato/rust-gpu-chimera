@@ -7,15 +7,15 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-glam = { version = "0.24", default-features = false, features = ["libm"] }
+glam = { version = "0.30", default-features = false, features = ["libm"] }
 
 shared = { path = "../shared" }
 
 [target.'cfg(target_arch = "spirv")'.dependencies]
-spirv-std = { git = "https://github.com/rust-gpu/rust-gpu", branch = "main" }
+spirv-std = { git = "https://github.com/rust-gpu/rust-gpu", rev = "ddb039b" }
 
 [target.'cfg(target_os = "cuda")'.dependencies]
-cuda_std = { git = "https://github.com/Rust-GPU/Rust-CUDA", branch = "main", default-features = false }
+cuda_std = { git = "https://github.com/Rust-GPU/Rust-CUDA", rev = "0bc607f", default-features = false }
 
 [target.'cfg(not(any(target_arch = "spirv", target_os = "cuda")))'.dependencies]
 rayon = "1.7"

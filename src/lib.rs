@@ -5,7 +5,7 @@
 //! - CUDA (via rust-cuda)
 //! - Vulkan (via rust-gpu/SPIR-V)
 
-#![feature(once_cell_try)]
+#![cfg_attr(feature = "cuda", feature(once_cell_try))]
 
 // Feature validation
 

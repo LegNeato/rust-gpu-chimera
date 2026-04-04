@@ -43,12 +43,19 @@ impl AshRunner {
             let engine_name =
                 CString::new("rust-gpu-chimera").map_err(|e| ChimeraError::Other(e.to_string()))?;
 
+            // Query the highest supported Vulkan version, falling back to 1.2
+            let api_version = entry
+                .try_enumerate_instance_version()
+                .ok()
+                .flatten()
+                .unwrap_or(vk::API_VERSION_1_2);
+
             let app_info = vk::ApplicationInfo::default()
                 .application_name(&app_name)
                 .application_version(vk::make_api_version(0, 1, 0, 0))
                 .engine_name(&engine_name)
                 .engine_version(vk::make_api_version(0, 1, 0, 0))
-                .api_version(vk::API_VERSION_1_2);
+                .api_version(api_version);
 
             // Enable portability extensions for MoltenVK on macOS
             #[allow(unused_mut)] // Only modified on macOS
